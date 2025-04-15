@@ -5,8 +5,10 @@
 #include <string.h>
 #include <stdlib.h>
 
-const int n_words = 258, n_tests = 1000, target_load_factor = 20;
-const char text_path[] = "txt/text.txt", words_path[] = "txt/lines", unique_path[] = "txt/unique";
+#include <immintrin.h>
+
+const int n_words = 9423, n_tests = 1e6, target_load_factor = 20;
+const char text_path[] = "txt/lord-of-rings.txt", words_path[] = "txt/lines", unique_path[] = "txt/unique";
 
 int main(int argc, const char** argv)
 {

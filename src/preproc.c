@@ -8,7 +8,6 @@
 
 #define buflen 256
 
-
 long fileSize(FILE *file)
 {
     if (fseek(file, 0L, SEEK_END)) return -1;
@@ -42,12 +41,14 @@ int write_words(const char* in_path, const char* out_path)
     while (fscanf(fin, "%s", buf) == 1)
     {
         int empty = 1;
-        for (int c = 0; buf[c] != '\0'; ++c)
+        for (int i = 0; buf[i] != '\0'; ++i)
         {
-            if (isalnum(buf[c]))
+            char c = buf[i];
+            if (isalpha(c))
             {
                 empty = 0;
-                fputc(buf[c], fout);
+                if ('A' <= c && c <= 'Z') c += 'a' - 'A';
+                fputc(c, fout);
             }
         }
         if (!empty) fputc('\n', fout);
@@ -111,12 +112,12 @@ int fill_tbl(Table* tbl, Node** long_lst, const char* in_path, int n_words, char
     return 0;
 }
 
-int get_rand_index(int max_ind)
+int __attribute__ ((noinline)) get_rand_index(int max_ind)
 {
     return rand() % max_ind;
 }
 
-int test_tbl(Table* tbl, Node* long_lst, int n_tests, int n_words, char** words)
+int __attribute__ ((noinline)) test_tbl(Table* tbl, Node* long_lst, int n_tests, int n_words, char** words)
 {
     int found_cnt = 0;
     while (n_tests--)

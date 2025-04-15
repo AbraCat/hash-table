@@ -6,7 +6,7 @@
 
 const int maxlen = 32; // including \0
 
-int hash_fn(char* s, int mod)
+int __attribute__ ((noinline)) hash_fn(char* s, int mod)
 {
     int h = 5381;
     for (; *s != '\0'; ++s)
@@ -49,7 +49,7 @@ Node* lst_insert(Node* node, char* s)
     return node_ctr(node, s);
 }
 
-Node* lst_find(Node* node, char* s)
+Node* __attribute__ ((noinline)) lst_find(Node* node, char* s)
 {
     while (node != NULL)
     {
@@ -82,7 +82,7 @@ void tbl_insert(Table* tbl, char* s)
     tbl->data[h] = lst_insert(tbl->data[h], s);
 }
 
-int tbl_find(Table* tbl, char* s)
+int __attribute__ ((noinline)) tbl_find(Table* tbl, char* s)
 {
     int h = hash_fn(s, tbl->n);
     return lst_find(tbl->data[h], s) != NULL;

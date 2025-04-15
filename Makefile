@@ -1,4 +1,4 @@
-.PHONY: all pre run clean valgr
+.PHONY: all pre run clean valgr rm-valgr
 
 all: main.exe
 
@@ -16,8 +16,11 @@ clean:
 valgr:
 	@valgrind --tool=callgrind --toggle-collect=test_tbl ./main.exe
 
+rm-valgr:
+	@rm callgrind*
+
 CC := gcc
-FLAGS := -I h -O0 -g
+FLAGS := -I h -g -O2 -msha
 OFILES := o/preproc.o o/table.o o/main.o
 
 main.exe: $(OFILES)
