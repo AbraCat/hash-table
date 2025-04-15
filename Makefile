@@ -1,4 +1,4 @@
-.PHONY: all pre run
+.PHONY: all pre run clean valgr
 
 all: main.exe
 
@@ -7,6 +7,14 @@ pre: all
 
 run: all
 	@./main.exe
+
+clean:
+	@rm -rf o
+	@mkdir o
+	@rm main.exe
+
+valgr:
+	@valgrind --tool=callgrind --toggle-collect=test_tbl ./main.exe
 
 CC := gcc
 FLAGS := -I h -O0 -g

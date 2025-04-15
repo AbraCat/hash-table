@@ -37,4 +37,7 @@ void lst_write_keys(Node* node, FILE* fout);
 int tbl_n_keys(Table* tbl);
 void tbl_write_keys(Table* tbl, FILE* fout);
 
+void lst_dump(Node* node, FILE* file);
+void tbl_dump(Table* tbl, FILE* file);
+
 #endif // TABLE_H

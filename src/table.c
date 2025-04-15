@@ -19,15 +19,16 @@ Node* node_ctr(Node* next, char* s)
     Node* node = (Node*)calloc(sizeof(Node), 1);
     if (node == NULL) return NULL;
 
-    node->s = (char*)calloc(maxlen, sizeof(char));
+    int len = strlen(s);
+    node->s = (char*)calloc(len > maxlen ? len : maxlen, sizeof(char));
     if (node->s == NULL)
     {
         free(node);
         return NULL;
     }
 
-    strncpy(node->s, s, maxlen);
-    for (int i = strlen(s); i < maxlen; ++i)
+    strncpy(node->s, s, len);
+    for (int i = len; i < maxlen; ++i)
         node->s[i] = '\0';
 
     node->next = next;
@@ -119,4 +120,24 @@ void tbl_write_keys(Table* tbl, FILE* fout)
 {
     for (int i = 0; i < tbl->n; ++i)
         lst_write_keys(tbl->data[i], fout);
+}
+
+void lst_dump(Node* node, FILE* file)
+{
+    while(node != NULL)
+    {
+        fprintf(file, "%s ", node->s);
+        node = node->next;
+    }
+    fputc('\n', file);
+}
+
+void tbl_dump(Table* tbl, FILE* file)
+{
+    fprintf(file, "Hash table %p\nn: %d\n", tbl, tbl->n);
+    for (int i = 0; i < tbl->n; ++i)
+    {
+        fprintf(file, "%d: ", i);
+        lst_dump(tbl->data[i], file);
+    }
 }

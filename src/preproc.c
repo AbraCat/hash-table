@@ -8,6 +8,31 @@
 
 #define buflen 256
 
+
+long fileSize(FILE *file)
+{
+    if (fseek(file, 0L, SEEK_END)) return -1;
+
+    long siz = ftell(file);
+    if (siz == -1L) return -1;
+
+    if (fseek(file, 0L, SEEK_SET)) return -1;
+
+    return siz;
+}
+
+int readFile(FILE* file, char** bufptr)
+{
+    long siz = fileSize(file);
+    if (siz == -1L) return 1;
+
+    char* buf = *bufptr = (char*)calloc(siz + 1, sizeof(char));
+    if (buf == NULL) return 1;
+
+    fread(buf, sizeof(char), siz, file);
+    return 0;
+}
+
 int write_words(const char* in_path, const char* out_path)
 {
     FILE *fin = fopen(in_path, "r"), *fout = fopen(out_path, "w");
@@ -43,11 +68,10 @@ int write_unique(const char* in_path, const char* out_path, int* n_unique)
 
     char buf[buflen] = "";
     while (fscanf(fin, "%s", buf) == 1)
-        if (strlen(buf) < maxlen)
-            tbl_insert(tbl, buf);
+        tbl_insert(tbl, buf);
 
-    tbl_write_keys(tbl, fout);
     *n_unique = tbl_n_keys(tbl);
+    tbl_write_keys(tbl, fout);
 
     tbl_dtr(tbl);
     fclose(fin);
@@ -55,25 +79,35 @@ int write_unique(const char* in_path, const char* out_path, int* n_unique)
     return 0;
 }
 
-int fill_tbl(Table* tbl, const char* in_path, int n_words, char** words)
+void divide_words(int n_words, char* txt, char** words)
+{
+    int w = 0;
+    words[0] = txt;
+    for (int c = 0; w < n_words; ++c)
+    {
+        if (txt[c] == '\n')
+        {
+            txt[c] = '\0';
+            ++w;
+            if (w != n_words) words[w] = txt + c + 1;
+        }
+    }
+}
+
+int fill_tbl(Table* tbl, Node** long_lst, const char* in_path, int n_words, char** txt_buf, char** words)
 {
     FILE *fin = fopen(in_path, "r");
     if (fin == NULL) return 1;
 
-    char* _words = (char*)calloc(n_words * maxlen, sizeof(char));
-    if (_words == NULL) return 1;
+    if (readFile(fin, txt_buf) != 0) return 1;
+    divide_words(n_words, *txt_buf, words);
 
-    char buf[buflen] = "";
     for (int i = 0; i < n_words; ++i)
     {
-        fscanf(fin, "%s", buf);
-        strncpy(_words + maxlen * i, buf, maxlen - 1);
-        _words[maxlen * i + maxlen - 1] = '\0';
-
-        tbl_insert(tbl, buf);
+        if (strlen(words[i]) < maxlen) tbl_insert(tbl, words[i]);
+        else *long_lst = lst_insert(*long_lst, words[i]);
     }
 
-    *words = _words;
     return 0;
 }
 
@@ -82,19 +116,20 @@ int get_rand_index(int max_ind)
     return rand() % max_ind;
 }
 
-char* get_word(char* words, int ind)
-{
-    return words + ind * maxlen;
-}
-
-int test_tbl(Table* tbl, int n_tests, int n_words, char* words)
+int test_tbl(Table* tbl, Node* long_lst, int n_tests, int n_words, char** words)
 {
     int found_cnt = 0;
     while (n_tests--)
     {
-        int ind = get_rand_index(n_words);
-        char* word = get_word(words, ind);
-        if (tbl_find(tbl, word)) ++found_cnt;
+        char* word = words[get_rand_index(n_words)];
+        if (strlen(word) < maxlen)
+        {
+            if (tbl_find(tbl, word)) ++found_cnt;
+        }
+        else
+        {
+            if (lst_find(long_lst, word) != NULL) ++found_cnt;
+        }
     }
     return found_cnt;
 }
