@@ -20,8 +20,8 @@ rm-valgr:
 	@rm callgrind*
 
 CC := gcc
-FLAGS := -I h -g -O2 -msha
-OFILES := o/preproc.o o/table.o o/main.o
+FLAGS := -I h -g -O2
+OFILES := o/preproc.o o/table.o o/test.o o/main.o
 
 main.exe: $(OFILES)
 	@gcc $(FLAGS) $(OFILES) -o main.exe
@@ -30,6 +30,9 @@ o/preproc.o: src/preproc.c
 	@$(CC) $(FLAGS) $< -c -o $@
 
 o/table.o: src/table.c
+	@$(CC) $(FLAGS) $< -c -o $@
+
+o/test.o: src/test.c
 	@$(CC) $(FLAGS) $< -c -o $@
 
 o/main.o: src/main.c
