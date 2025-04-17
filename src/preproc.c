@@ -25,7 +25,8 @@ int readFile(FILE* file, char** bufptr)
     long siz = fileSize(file);
     if (siz == -1L) return 1;
 
-    char* buf = *bufptr = (char*)calloc(siz + 1, sizeof(char));
+    char* buf = *bufptr = (char*)aligned_alloc(align, round_up(siz + 1, align));
+    // char* buf = *bufptr = (char*)malloc(siz + 1);
     if (buf == NULL) return 1;
 
     fread(buf, sizeof(char), siz, file);
@@ -59,10 +60,10 @@ int write_words(const char* in_path, const char* out_path)
     return 0;
 }
 
-int write_unique(const char* in_path, const char* out_path, int* n_unique)
+int write_unique(const char* in_path, const char* short_path, const char* long_path, int* n_short, int* n_long)
 {
-    FILE *fin = fopen(in_path, "r"), *fout = fopen(out_path, "w");
-    if (fin == NULL || fout == NULL) return 1;
+    FILE *fin = fopen(in_path, "r"), *fshort = fopen(short_path, "w"), *flong = fopen(long_path, "w");
+    if (fin == NULL || fshort == NULL || flong == NULL) return 1;
 
     Table* tbl = tbl_ctr(10000);
     if (tbl == NULL) return 1;
@@ -71,66 +72,34 @@ int write_unique(const char* in_path, const char* out_path, int* n_unique)
     while (fscanf(fin, "%s", buf) == 1)
         tbl_insert(tbl, buf);
 
-    *n_unique = tbl_n_keys(tbl);
-    tbl_write_keys(tbl, fout);
+    *n_short = *n_long = 0;
+    for (int i = 0; i < tbl->n; ++i)
+    {
+        Node* node = tbl->data[i];
+        while (node != NULL)
+        {
+            int len = strlen(node->s);
+            if (len < maxlen)
+            {
+                ++(*n_short);
+                fputs(node->s, fshort);
+                for (int j = len; j < maxlen; ++j)
+                    fputc('\0', fshort);
+            }
+            else
+            {
+                ++(*n_long);
+                fprintf(flong, "%s\n", node->s);
+            }
+            node = node->next;
+        }
+    }
 
     tbl_dtr(tbl);
     fclose(fin);
-    fclose(fout);
+    fclose(fshort);
+    fclose(flong);
     return 0;
 }
 
-void divide_words(int n_words, char* txt, char** words)
-{
-    int w = 0;
-    words[0] = txt;
-    for (int c = 0; w < n_words; ++c)
-    {
-        if (txt[c] == '\n')
-        {
-            txt[c] = '\0';
-            ++w;
-            if (w != n_words) words[w] = txt + c + 1;
-        }
-    }
-}
-
-int fill_tbl(Table* tbl, Node** long_lst, const char* in_path, int n_words, char** txt_buf, char** words)
-{
-    FILE *fin = fopen(in_path, "r");
-    if (fin == NULL) return 1;
-
-    if (readFile(fin, txt_buf) != 0) return 1;
-    divide_words(n_words, *txt_buf, words);
-
-    for (int i = 0; i < n_words; ++i)
-    {
-        if (strlen(words[i]) < maxlen) tbl_insert(tbl, words[i]);
-        else *long_lst = lst_insert(*long_lst, words[i]);
-    }
-
-    return 0;
-}
-
-int __attribute__ ((noinline)) get_rand_index(int max_ind)
-{
-    return rand() % max_ind;
-}
-
-int __attribute__ ((noinline)) test_tbl(Table* tbl, Node* long_lst, int n_tests, int n_words, char** words)
-{
-    int found_cnt = 0;
-    while (n_tests--)
-    {
-        char* word = words[get_rand_index(n_words)];
-        if (strlen(word) < maxlen)
-        {
-            if (tbl_find(tbl, word)) ++found_cnt;
-        }
-        else
-        {
-            if (lst_find(long_lst, word) != NULL) ++found_cnt;
-        }
-    }
-    return found_cnt;
-}
+char* __attribute__ ((noinline)) get_word(char* words, int ind) { return words + ind * maxlen; }

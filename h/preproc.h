@@ -3,11 +3,12 @@
 
 #include <table.h>
 
-int write_words(const char* in_path, const char* out_path);
-int write_unique(const char* in_path, const char* out_path, int* n_unique);
-int fill_tbl(Table* tbl, Node** long_lst, const char* in_path, int n_words, char** txt_buf, char** words);
+long fileSize(FILE *file);
+int readFile(FILE* file, char** bufptr);
 
-int get_rand_index(int max_ind);
-int test_tbl(Table* tbl, Node* long_lst, int n_tests, int n_words, char** words);
+int write_words(const char* in_path, const char* out_path);
+int write_unique(const char* in_path, const char* short_path, const char* long_path, int* n_short, int* n_long);
+
+char* get_word(char* words, int ind);
 
 #endif // PREPROC_H

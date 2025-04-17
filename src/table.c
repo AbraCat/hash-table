@@ -2,9 +2,8 @@
 
 #include <stdlib.h>
 #include <string.h>
-// #include <assert.h>
 
-const int maxlen = 32; // including \0
+const int maxlen = 32, align = 32;
 
 int __attribute__ ((noinline)) hash_fn(char* s, int mod)
 {
@@ -14,13 +13,16 @@ int __attribute__ ((noinline)) hash_fn(char* s, int mod)
     return (h % mod + mod) % mod;
 }
 
+int round_up(int n, int align) { return n % align == 0 ? n : align * (n / align + 1); }
+
 Node* node_ctr(Node* next, char* s)
 {
     Node* node = (Node*)calloc(sizeof(Node), 1);
     if (node == NULL) return NULL;
 
     int len = strlen(s);
-    node->s = (char*)calloc(len > maxlen ? len : maxlen, sizeof(char));
+    node->s = (char*)aligned_alloc(align, round_up(len > maxlen ? len : maxlen, align));
+    // node->s = (char*)malloc(len > maxlen ? len : maxlen);
     if (node->s == NULL)
     {
         free(node);

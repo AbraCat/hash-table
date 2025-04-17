@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-extern const int maxlen;
+extern const int maxlen, align;
 
 typedef struct Node Node;
 typedef struct Table Table;
@@ -21,6 +21,7 @@ typedef struct Table
 } Table;
 
 int hash_fn(char* s, int mod);
+int round_up(int n, int align);
 
 Node* node_ctr(Node* next, char* s);
 void node_dtr(Node* node);
