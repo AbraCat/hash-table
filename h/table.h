@@ -10,8 +10,8 @@ typedef struct Table Table;
 
 typedef struct Node
 {
-    Node* next;
     char* s;
+    Node* next;
 } Node;
 
 typedef struct Table

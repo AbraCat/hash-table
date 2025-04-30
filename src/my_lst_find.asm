@@ -6,34 +6,34 @@ section .text
 ; -------------------------------------
 ; Args:
 ; rdi - node
-; rdi - s
+; rsi - s
 ;
 ; Returns
 ; rax - node
 ; -------------------------------------
 my_lst_find:
-
+    push rbx
+    mov rbx, rdi
     jmp my_lst_find_cond
 
     my_lst_find_loop:
-    mov rdi, rdi
-
-    push rdi
-    push rsi
+    mov rdi, QWORD [rbx]
     call mystrcmp
-    pop rsi
-    pop rdi
 
     test rax, rax
     je my_lst_find_continue
-    mov rax, rdi
+
+    mov rax, rbx
+    pop rbx
     ret 
 
     my_lst_find_continue:
-    mov rdi, QWORD [rdi]
+    mov rbx, QWORD [rbx + 8]
+    
     my_lst_find_cond:
-    test rdi, rdi
+    test rbx, rbx
     jne my_lst_find_loop
 
     xor rax, rax
+    pop rbx
     ret

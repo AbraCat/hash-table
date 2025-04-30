@@ -117,7 +117,7 @@ int __attribute__ ((noinline)) my_hash_fn(const char* s, int mod)
     return (hash % mod + mod) % mod;
 }
 
-inline int crc32(const char* s)
+static inline int crc32(const char* s)
 {
     int h = -1, cnt = 8;
     while (cnt--)
@@ -205,7 +205,7 @@ void tbl_insert(Table* tbl, char* s)
 int __attribute__ ((noinline)) tbl_find(Table* tbl, char* s)
 {
     int h = my_hash_fn(s, tbl->n);
-    return lst_find(tbl->data[h], s) != NULL;
+    return my_lst_find(tbl->data[h], s) != NULL;
 }
 
 int lst_n_keys(Node* node)
