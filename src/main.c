@@ -9,6 +9,22 @@ const int n_short = 9423, n_long = 0, n_tests = 1e6;
 const char text_path[] = "txt/lord-of-rings.txt", words_path[] = "txt/lines", 
 short_path[] = "txt/short", long_path[] = "txt/long";
 
+int f(int a, int b)
+{
+    int c = -1;
+    // printf("a: %d b: %d c: %d\n", a, b, c);
+    // asm volatile(
+    //     "mov %1, %%rax\n"
+    //     "shl $1, %%rax\n"
+    //     "add %2, %%rax\n"
+    //     "mov %%rax, %0"
+    // : "+r" (a)
+    // : "r"  (a), "r" (b)
+    // : "rax");
+    // printf("a: %d b: %d c: %d\n", a, b, c);
+    return c;
+}
+
 int main(int argc, const char** argv)
 {
     srand(1);

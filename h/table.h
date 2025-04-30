@@ -10,8 +10,8 @@ typedef struct Table Table;
 
 typedef struct Node
 {
-    char* s;
     Node* next;
+    char* s;
 } Node;
 
 typedef struct Table
@@ -20,7 +20,9 @@ typedef struct Table
     int n;
 } Table;
 
-int hash_fn(char* s, int mod);
+int mystrcmp(const char* lft, const char* rgt);
+int my_hash_fn(const char* s, int mod);
+int hash_fn(const char* s, int mod);
 int round_up(int n, int align);
 
 Node* node_ctr(Node* next, char* s);
