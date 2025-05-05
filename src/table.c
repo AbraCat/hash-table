@@ -84,51 +84,37 @@ int __attribute__ ((noinline)) mystrcmp(const char* lft, const char* rgt)
 
 int __attribute__ ((noinline)) my_hash_fn(const char* s, int mod)
 {
-    long long hash, h1, h2, h3, h4, tmp;
+    long long hash, str;
     asm volatile(
-        "movq $-1, %3\n"
-        "movq $-1, %4\n"
-        "movq $-1, %5\n"
-        "movq $-1, %6\n"
+        "movq $-1, %0\n"
 
-        "movq (%1), %2\n"
-        "crc32 %2, %3\n"
+        "mov (%1), %2\n"
+        "crc32 %2, %0\n"
         "add $8, %1\n"
 
-        "movq (%1), %2\n"
-        "crc32 %2, %4\n"
+        "mov (%1), %2\n"
+        "crc32 %2, %0\n"
         "add $8, %1\n"
 
-        "movq (%1), %2\n"
-        "crc32 %2, %5\n"
+        "mov (%1), %2\n"
+        "crc32 %2, %0\n"
         "add $8, %1\n"
 
-        "movq (%1), %2\n"
-        "crc32 %2, %6\n"
-        "add $8, %1\n"
+        "mov (%1), %2\n"
+        "crc32 %2, %0\n"
 
-        "xor %0, %0\n"
-        "add %3, %0\n"
-        "add %4, %0\n"
-        "add %5, %0\n"
-        "add %6, %0\n"
-        : "+r" (hash), "+r" (s), "=r" (tmp), "=r" (h1), "=r" (h2), "=r" (h3), "=r" (h4)
+        : "+r" (hash), "+r" (s), "=r" (str)
     );
+    
     return (hash % mod + mod) % mod;
-}
-
-static inline int crc32(const char* s)
-{
-    int h = -1, cnt = 8;
-    while (cnt--)
-        h = (h >> 8) ^ crc32_table[(h ^ *s++) & 0xff];
-    return h ^ -1;
 }
 
 int __attribute__ ((noinline)) hash_fn(const char* s, int mod)
 {
-    int h1 = crc32(s), h2 = crc32(s + 8), h3 = crc32(s + 16), h4 = crc32(s + 24);
-    return ((h1 + h2 + h3 + h4) % mod + mod) % mod;
+    int h = -1;
+    while (*s != '\0')
+        h = (h >> 8) ^ crc32_table[(h ^ *s++) & 0xff];
+    return ((h ^ -1) % mod + mod) % mod;
 }
 
 int round_up(int n, int align) { return n % align == 0 ? n : align * (n / align + 1); }
