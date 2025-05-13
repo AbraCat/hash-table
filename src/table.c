@@ -71,18 +71,8 @@ static const unsigned int crc32_table[] =
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include <nmmintrin.h>
 
-const int maxlen = 32, align = 32;
-
-int __attribute__ ((noinline)) mystrcmp(const char* lft, const char* rgt)
-{
-    int ind1 = _mm_cmpistri(_mm_loadu_si128(lft), _mm_loadu_si128(rgt), _SIDD_NEGATIVE_POLARITY | _SIDD_UBYTE_OPS | _SIDD_CMP_EQUAL_EACH | _SIDD_LEAST_SIGNIFICANT);
-    int ind2 = _mm_cmpistri(_mm_loadu_si128(lft + 16), _mm_loadu_si128(rgt + 16), _SIDD_NEGATIVE_POLARITY | _SIDD_UBYTE_OPS | _SIDD_CMP_EQUAL_EACH | _SIDD_LEAST_SIGNIFICANT);
-    return ind1 == 16 && ind2 == 16;
-}
-
-int __attribute__ ((noinline)) my_hash_fn(const char* s, int mod)
+int hash_attributes my_hash_fn(const char* s, int mod)
 {
     long long hash, str;
     asm volatile(
@@ -109,7 +99,7 @@ int __attribute__ ((noinline)) my_hash_fn(const char* s, int mod)
     return (hash % mod + mod) % mod;
 }
 
-int __attribute__ ((noinline)) hash_fn(const char* s, int mod)
+int hash_attributes hash_fn(const char* s, int mod)
 {
     int h = -1;
     while (*s != '\0')
@@ -117,59 +107,11 @@ int __attribute__ ((noinline)) hash_fn(const char* s, int mod)
     return ((h ^ -1) % mod + mod) % mod;
 }
 
-int round_up(int n, int align) { return n % align == 0 ? n : align * (n / align + 1); }
-
-Node* node_ctr(Node* next, char* s)
-{
-    Node* node = (Node*)calloc(sizeof(Node), 1);
-    if (node == NULL) return NULL;
-
-    int len = strlen(s);
-    node->s = (char*)aligned_alloc(align, round_up(len > maxlen ? len : maxlen, align));
-    if (node->s == NULL)
-    {
-        free(node);
-        return NULL;
-    }
-
-    strncpy(node->s, s, len);
-    for (int i = len; i < maxlen; ++i)
-        node->s[i] = '\0';
-
-    node->next = next;
-    return node;
-}
-
-void node_dtr(Node* node)
-{
-    if (node == NULL) return;
-    node_dtr(node->next);
-    free(node->s);
-    free(node);
-}
-
-Node* lst_insert(Node* node, char* s)
-{
-    if (lst_find(node, s) != NULL) return node;
-    return node_ctr(node, s);
-}
-
-Node* __attribute__ ((noinline)) lst_find(Node* node, char* s)
-{
-    while (node != NULL)
-    {
-        // assert((strcmp(node->s, s) == 0) == mystrcmp(node->s, s));
-        if (mystrcmp(node->s, s)) return node;
-        node = node->next;
-    }
-    return NULL;
-}
-
 Table* tbl_ctr(int n)
 {
     Table* tbl = (Table*)calloc(sizeof(Table), 1);
     tbl->n = n;
-    tbl->data = (Node**)calloc(n, sizeof(Node*));
+    tbl->data = (TblNode**)calloc(n, sizeof(TblNode*));
 
     return tbl;
 }
@@ -177,65 +119,34 @@ Table* tbl_ctr(int n)
 void tbl_dtr(Table* tbl)
 {
     for (int i = 0; i < tbl->n; ++i)
-        node_dtr(tbl->data[i]);
+        list_dtr(tbl->data[i]);
     free(tbl->data);
     free(tbl);
 }
 
 void tbl_insert(Table* tbl, char* s)
 {
-    int h = my_hash_fn(s, tbl->n);
-    tbl->data[h] = lst_insert(tbl->data[h], s);
+    int h = tbl_hash_fn(s, tbl->n);
+    tbl->data[h] = list_insert(tbl->data[h], s);
 }
 
 int __attribute__ ((noinline)) tbl_find(Table* tbl, char* s)
 {
-    int h = my_hash_fn(s, tbl->n);
-    return my_lst_find(tbl->data[h], s) != NULL;
+    int h = tbl_hash_fn(s, tbl->n);
+    return list_find(tbl->data[h], s);
 }
 
-int lst_n_keys(Node* node)
+double hash_dispersion(Table* tbl)
 {
-    int cnt = 0;
-    while (node != NULL)
-    {
-        ++cnt;
-        node = node->next;
-    }
-    return cnt;
-}
-
-void lst_write_keys(Node* node, FILE* fout)
-{
-    while (node != NULL)
-    {
-        fprintf(fout, "%s\n", node->s);
-        node = node->next;
-    }
-}
-
-int tbl_n_keys(Table* tbl)
-{
-    int cnt = 0;
+    unsigned long long* colls = (unsigned long long*)calloc(sizeof(unsigned long long), tbl->n);
     for (int i = 0; i < tbl->n; ++i)
-        cnt += lst_n_keys(tbl->data[i]);
-    return cnt;
-}
+        colls[i] = list_n_keys(tbl->data[i]);
 
-void tbl_write_keys(Table* tbl, FILE* fout)
-{
-    for (int i = 0; i < tbl->n; ++i)
-        lst_write_keys(tbl->data[i], fout);
-}
+    double disp = 0;
+    dispersion(colls, tbl->n, &disp, NULL);
 
-void lst_dump(Node* node, FILE* file)
-{
-    while(node != NULL)
-    {
-        fprintf(file, "%s ", node->s);
-        node = node->next;
-    }
-    fputc('\n', file);
+    free(colls);
+    return disp;
 }
 
 void tbl_dump(Table* tbl, FILE* file)
@@ -244,6 +155,6 @@ void tbl_dump(Table* tbl, FILE* file)
     for (int i = 0; i < tbl->n; ++i)
     {
         fprintf(file, "%d: ", i);
-        lst_dump(tbl->data[i], file);
+        list_dump(tbl->data[i], file);
     }
 }

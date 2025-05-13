@@ -3,8 +3,11 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
-const int target_load_factor = 20;
+#include <immintrin.h>
+
+const int target_load_factor = 20, n_discarded_tests = 32, n_tbl_tests = 32;
 
 void divide_words(int n_words, char* txt, char** words)
 {
@@ -38,17 +41,33 @@ int fill_tbl(Test* t, const char* short_path, const char* long_path)
 
     return 0;
 }
-int __attribute__ ((noinline)) get_rand_index(int max_ind) { return rand() % max_ind; }
+int get_rand_index(int max_ind) { return rand() % max_ind; }
 
-char* __attribute__ ((noinline)) find_word(int n_words, char** words, char* word)
+char* find_word(int n_words, char** words, char* word)
 {
     for (int i = 0; i < n_words; ++i)
         if (strcmp(words[i], word) == 0) return words[i];
     return NULL;
 }
 
-int __attribute__ ((noinline)) test_tbl(int n_tests, Test t)
+int measure_tbl_time(int n_tests, const Test t)
 {
+    unsigned long long* time_arr = 
+        (unsigned long long*)calloc(sizeof(unsigned long long), n_discarded_tests + n_tbl_tests);
+    for (int i = 0; i < n_discarded_tests + n_tbl_tests; ++i)
+        time_arr[i] = test_tbl(n_tests, t, NULL);
+
+    double expect = 0, disp = 0;
+    dispersion(time_arr + n_discarded_tests, n_tbl_tests, &disp, &expect);
+    printf("%lf +- %lf\n", expect, sqrt(disp));
+
+    free(time_arr);
+    return 0;
+}
+
+unsigned long long __attribute__ ((noinline)) test_tbl(int n_tests, const Test t, int* n_found)
+{
+    unsigned long long start_time = _rdtsc();
     int found_cnt = 0;
     while (n_tests--)
     {
@@ -65,7 +84,8 @@ int __attribute__ ((noinline)) test_tbl(int n_tests, Test t)
             if (find_word(t.n_long, t.long_words, word) != NULL) ++found_cnt;
         }
     }
-    return found_cnt;
+    if (n_found != NULL) *n_found = found_cnt;
+    return _rdtsc() - start_time;
 }
 
 void test_dtr(Test* t)

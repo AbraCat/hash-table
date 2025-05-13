@@ -102,4 +102,4 @@ int write_unique(const char* in_path, const char* short_path, const char* long_p
     return 0;
 }
 
-char* __attribute__ ((noinline)) get_word(char* words, int ind) { return words + ind * maxlen; }
+char* get_word(char* words, int ind) { return words + ind * maxlen; }

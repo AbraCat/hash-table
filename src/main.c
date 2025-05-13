@@ -5,6 +5,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include <immintrin.h>
+
 const int n_short = 9423, n_long = 0, n_tests = 1e6;
 const char text_path[] = "txt/lord-of-rings.txt", words_path[] = "txt/lines", 
 short_path[] = "txt/short", long_path[] = "txt/long";
@@ -28,8 +30,21 @@ int main(int argc, const char** argv)
     t.n_long = n_long;
     if (fill_tbl(&t, short_path, long_path)) return 1;
 
-    int found_cnt = test_tbl(n_tests, t);
-    printf("Found %d / %d words\n", found_cnt, n_tests);
+    if (argc > 1 && strcmp(argv[1], "-h") == 0)
+    {
+        printf("Hash dispersion: %lf\n", hash_dispersion(t.tbl));
+        return 0;
+    }
+    if (argc > 1 && strcmp(argv[1], "-m") == 0)
+    {
+        measure_tbl_time(n_tests, t);
+        return 0;
+    }
+
+    unsigned long long start = _rdtsc();
+    int n_found = 0;
+    unsigned long long elapsed_time = test_tbl(n_tests, t, &n_found);
+    printf("Found %d / %d words (%lld elapsed)\n", n_found, n_tests, elapsed_time);
 
     test_dtr(&t);
     return 0;

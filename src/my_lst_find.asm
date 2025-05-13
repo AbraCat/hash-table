@@ -9,7 +9,7 @@ section .text
 ; rsi - s
 ;
 ; Returns
-; rax - node
+; eax - result
 ; -------------------------------------
 my_lst_find:
     push rbx
@@ -23,7 +23,7 @@ my_lst_find:
     test rax, rax
     je my_lst_find_continue
 
-    mov rax, rbx
+    mov eax, 1 ; mov rax, rbx
     pop rbx
     ret 
 
@@ -34,6 +34,6 @@ my_lst_find:
     test rbx, rbx
     jne my_lst_find_loop
 
-    xor rax, rax
+    xor eax, eax
     pop rbx
     ret
