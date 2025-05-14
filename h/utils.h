@@ -5,13 +5,10 @@
 #define align 32
 #define unroll_coeff 4
 
-// #define TBL_USE_UNR
-// #define OPT_STRCMP
-// #define OPT_HASH_FN
-// #define OPT_LIST_FIND
-
-// #define NOINLINE_STRCMP
-// #define NOINLINE_HASH
+#define TBL_USE_UNR
+#define OPT_STRCMP
+#define OPT_HASH_FN
+#define OPT_LIST_FIND
 
 #ifdef TBL_USE_UNR
     #define TblNode UnrNode
@@ -48,18 +45,6 @@
 #else
 #define tbl_hash_fn hash_fn
 #endif // OPT_STRCMP
-
-#ifdef NOINLINE_STRCMP
-#define strcmp_attributes __attribute__ ((noinline))
-#else
-#define strcmp_attributes
-#endif // NOINLINE_STRCMP
-
-#ifdef NOINLINE_HASH
-#define hash_attributes __attribute__ ((noinline))
-#else
-#define hash_attributes
-#endif // NOINLINE_HASH
 
 int round_up(int n, int alignment);
 int mystrcmp(const char* lft, const char* rgt);

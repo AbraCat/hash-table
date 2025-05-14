@@ -72,7 +72,7 @@ static const unsigned int crc32_table[] =
 #include <string.h>
 #include <assert.h>
 
-int hash_attributes my_hash_fn(const char* s, int mod)
+int my_hash_fn(const char* s, int mod)
 {
     long long hash, str;
     asm volatile(
@@ -99,7 +99,7 @@ int hash_attributes my_hash_fn(const char* s, int mod)
     return (hash % mod + mod) % mod;
 }
 
-int hash_attributes hash_fn(const char* s, int mod)
+int hash_fn(const char* s, int mod)
 {
     int h = -1;
     while (*s != '\0')

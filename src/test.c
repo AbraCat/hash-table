@@ -7,7 +7,7 @@
 
 #include <immintrin.h>
 
-const int target_load_factor = 20, n_discarded_tests = 32, n_tbl_tests = 32;
+const int target_load_factor = 20, n_discard_tests = 128, n_tbl_tests = 256, report_interval = 16;
 
 void divide_words(int n_words, char* txt, char** words)
 {
@@ -53,12 +53,15 @@ char* find_word(int n_words, char** words, char* word)
 int measure_tbl_time(int n_tests, const Test t)
 {
     unsigned long long* time_arr = 
-        (unsigned long long*)calloc(sizeof(unsigned long long), n_discarded_tests + n_tbl_tests);
-    for (int i = 0; i < n_discarded_tests + n_tbl_tests; ++i)
-        time_arr[i] = test_tbl(n_tests, t, NULL);
+        (unsigned long long*)calloc(sizeof(unsigned long long), n_discard_tests + n_tbl_tests);
+    for (int i = 1; i <= n_discard_tests + n_tbl_tests; ++i)
+    {
+        if (i % report_interval == 0) printf("Running test %d / %d\n", i, n_discard_tests + n_tbl_tests);
+        time_arr[i - 1] = test_tbl(n_tests, t, NULL);
+    }
 
     double expect = 0, disp = 0;
-    dispersion(time_arr + n_discarded_tests, n_tbl_tests, &disp, &expect);
+    dispersion(time_arr + n_discard_tests, n_tbl_tests, &disp, &expect);
     printf("%lf +- %lf\n", expect, sqrt(disp));
 
     free(time_arr);
