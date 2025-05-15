@@ -6,7 +6,7 @@
 
 Node* node_ctr(Node* next, char* s)
 {
-    Node* node = (Node*)calloc(sizeof(Node), 1);
+    Node* node = (Node*)calloc(1, sizeof(Node));
     if (node == NULL) return NULL;
 
     int len = strlen(s);

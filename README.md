@@ -64,18 +64,18 @@ int mystrcmp(const char* lft, const char* rgt)
 Код исходной функции:
 
 ```
-int hash_fn(const char* s, int mod)
+int hash_fn(const char* s, unsigned mod)
 {
     int h = -1;
     while (*s != '\0')
         h = (h >> 8) ^ crc32_table[(h ^ *s++) & 0xff];
-    return ((h ^ -1) % mod + mod) % mod;
+    return (h ^ -1) % mod;
 }
 ```
 
 Код оптимизированной функции:
 ```
-int __attribute__ ((noinline)) my_hash_fn(const char* s, int mod)
+int my_hash_fn(const char* s, unsigned mod)
 {
     long long hash, str;
     asm volatile(
@@ -99,7 +99,7 @@ int __attribute__ ((noinline)) my_hash_fn(const char* s, int mod)
         : "+r" (hash), "+r" (s), "=r" (str)
     );
     
-    return (hash % mod + mod) % mod;
+    return hash % mod;
 }
 ```
 

@@ -72,7 +72,7 @@ static const unsigned int crc32_table[] =
 #include <string.h>
 #include <assert.h>
 
-int my_hash_fn(const char* s, int mod)
+int my_hash_fn(const char* s, unsigned mod)
 {
     long long hash, str;
     asm volatile(
@@ -96,20 +96,20 @@ int my_hash_fn(const char* s, int mod)
         : "+r" (hash), "+r" (s), "=r" (str)
     );
     
-    return (hash % mod + mod) % mod;
+    return hash % mod;
 }
 
-int hash_fn(const char* s, int mod)
+int hash_fn(const char* s, unsigned mod)
 {
     int h = -1;
     while (*s != '\0')
         h = (h >> 8) ^ crc32_table[(h ^ *s++) & 0xff];
-    return ((h ^ -1) % mod + mod) % mod;
+    return (h ^ -1) % mod;
 }
 
 Table* tbl_ctr(int n)
 {
-    Table* tbl = (Table*)calloc(sizeof(Table), 1);
+    Table* tbl = (Table*)calloc(1, sizeof(Table));
     tbl->n = n;
     tbl->data = (TblNode**)calloc(n, sizeof(TblNode*));
 
@@ -138,7 +138,7 @@ int __attribute__ ((noinline)) tbl_find(Table* tbl, char* s)
 
 double hash_dispersion(Table* tbl)
 {
-    unsigned long long* colls = (unsigned long long*)calloc(sizeof(unsigned long long), tbl->n);
+    unsigned long long* colls = (unsigned long long*)calloc(tbl->n, sizeof(unsigned long long));
     for (int i = 0; i < tbl->n; ++i)
         colls[i] = list_n_keys(tbl->data[i]);
 

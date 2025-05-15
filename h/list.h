@@ -6,12 +6,11 @@
 #include <utils.h>
 
 typedef struct Node Node;
-
-typedef struct Node
+struct Node
 {
     char* s;
     Node* next;
-} Node;
+};
 
 Node* node_ctr(Node* next, char* s);
 void node_dtr(Node* node);

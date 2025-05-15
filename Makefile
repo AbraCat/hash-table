@@ -26,7 +26,7 @@ rm-valgr:
 	@rm callgrind*
 
 CC := gcc
-FLAGS := -fno-pie -no-pie -lm -I h -O3 -mavx2
+FLAGS := -fno-pie -no-pie -I h -O3 -mavx2
 ASM_FLAGS := -f elf64 -F dwarf
 OFILES := o/preproc.o o/table.o o/test.o o/main.o o/utils.o o/list.o o/unrolled_list.o o/my_lst_find.o o/my_unr_find.o
 

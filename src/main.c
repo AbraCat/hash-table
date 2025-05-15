@@ -17,10 +17,10 @@ int main(int argc, const char** argv)
 
     if (argc > 1 && strcmp(argv[1], "-p") == 0)
     {
-        if (write_words(text_path, words_path) != 0) return 1;
+        if (write_words_to_file(text_path, words_path) != 0) return 1;
 
         int n_short = -1, n_long = -1;
-        if (write_unique(words_path, short_path, long_path, &n_short, &n_long) != 0) return 1;
+        if (write_unique_words(words_path, short_path, long_path, &n_short, &n_long) != 0) return 1;
         printf("Wrote %d short words and %d long words\n", n_short, n_long);
         return 0;
     }
@@ -41,7 +41,6 @@ int main(int argc, const char** argv)
         return 0;
     }
 
-    unsigned long long start = _rdtsc();
     int n_found = 0;
     unsigned long long elapsed_time = test_tbl(n_tests, t, &n_found);
     printf("Found %d / %d words (%lld elapsed)\n", n_found, n_tests, elapsed_time);

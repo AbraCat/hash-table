@@ -8,6 +8,8 @@
 
 #define buflen 256
 
+const int preprocess_tbl_capacity = 10000;
+
 long fileSize(FILE *file)
 {
     if (fseek(file, 0L, SEEK_END)) return -1;
@@ -26,14 +28,13 @@ int readFile(FILE* file, char** bufptr)
     if (siz == -1L) return 1;
 
     char* buf = *bufptr = (char*)aligned_alloc(align, round_up(siz + 1, align));
-    // char* buf = *bufptr = (char*)malloc(siz + 1);
     if (buf == NULL) return 1;
 
     fread(buf, sizeof(char), siz, file);
     return 0;
 }
 
-int write_words(const char* in_path, const char* out_path)
+int write_words_to_file(const char* in_path, const char* out_path)
 {
     FILE *fin = fopen(in_path, "r"), *fout = fopen(out_path, "w");
     if (fin == NULL || fout == NULL) return 1;
@@ -60,12 +61,12 @@ int write_words(const char* in_path, const char* out_path)
     return 0;
 }
 
-int write_unique(const char* in_path, const char* short_path, const char* long_path, int* n_short, int* n_long)
+int write_unique_words(const char* in_path, const char* short_path, const char* long_path, int* n_short, int* n_long)
 {
-    FILE *fin = fopen(in_path, "r"), *fshort = fopen(short_path, "w"), *flong = fopen(long_path, "w");
+    FILE *fin = fopen(in_path, "r"), *fshort = fopen(short_path, "wb"), *flong = fopen(long_path, "w");
     if (fin == NULL || fshort == NULL || flong == NULL) return 1;
 
-    Table* tbl = tbl_ctr(10000);
+    Table* tbl = tbl_ctr(preprocess_tbl_capacity);
     if (tbl == NULL) return 1;
 
     char buf[buflen] = "";
@@ -102,4 +103,4 @@ int write_unique(const char* in_path, const char* short_path, const char* long_p
     return 0;
 }
 
-char* get_word(char* words, int ind) { return words + ind * maxlen; }
+char* get_word_in_arr(char* words, int ind) { return words + ind * maxlen; }

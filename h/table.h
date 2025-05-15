@@ -8,15 +8,14 @@
 #include <unrolled_list.h>
 
 typedef struct Table Table;
-
-typedef struct Table
+struct Table
 {
     TblNode** data;
     int n;
-} Table;
+};
 
-int my_hash_fn(const char* s, int mod);
-int hash_fn(const char* s, int mod);
+int my_hash_fn(const char* s, unsigned mod);
+int hash_fn(const char* s, unsigned mod);
 
 Table* tbl_ctr(int n);
 void tbl_dtr(Table* tbl);

@@ -6,13 +6,12 @@
 #include <utils.h>
 
 typedef struct UnrNode UnrNode;
-
-typedef struct UnrNode
+struct UnrNode
 {
     char* s;
     UnrNode* next;
     int ind;
-} UnrNode;
+};
 
 UnrNode* unr_ctr(UnrNode* next, char* s);
 void unr_dtr(UnrNode* node);

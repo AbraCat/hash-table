@@ -32,18 +32,18 @@ int fill_tbl(Test* t, const char* short_path, const char* long_path)
     if (readFile(fshort, &t->short_buf) != 0) return 1;
     if (readFile(flong, &t->long_buf) != 0) return 1;
 
-    t->long_words = calloc(sizeof(char*), t->n_long);
+    t->long_words = calloc(t->n_long, sizeof(char*));
     divide_words(t->n_long, t->long_buf, t->long_words);
 
     t->tbl = tbl_ctr(t->n_short / target_load_factor);
     for (int i = 0; i < t->n_short; ++i)
-        tbl_insert(t->tbl, get_word(t->short_buf, i));
+        tbl_insert(t->tbl, get_word_in_arr(t->short_buf, i));
 
     return 0;
 }
 int get_rand_index(int max_ind) { return rand() % max_ind; }
 
-char* find_word(int n_words, char** words, char* word)
+char* find_word_in_arr(int n_words, char** words, char* word)
 {
     for (int i = 0; i < n_words; ++i)
         if (strcmp(words[i], word) == 0) return words[i];
@@ -53,7 +53,7 @@ char* find_word(int n_words, char** words, char* word)
 int measure_tbl_time(int n_tests, const Test t)
 {
     unsigned long long* time_arr = 
-        (unsigned long long*)calloc(sizeof(unsigned long long), n_discard_tests + n_tbl_tests);
+        (unsigned long long*)calloc(n_discard_tests + n_tbl_tests, sizeof(unsigned long long));
     for (int i = 1; i <= n_discard_tests + n_tbl_tests; ++i)
     {
         if (i % report_interval == 0) printf("Running test %d / %d\n", i, n_discard_tests + n_tbl_tests);
@@ -78,13 +78,13 @@ unsigned long long __attribute__ ((noinline)) test_tbl(int n_tests, const Test t
         char* word = NULL;
         if (ind < t.n_short)
         {
-            word = get_word(t.short_buf, ind);
+            word = get_word_in_arr(t.short_buf, ind);
             if (tbl_find(t.tbl, word)) ++found_cnt;
         }
         else
         {
             word = t.long_words[ind - t.n_short];
-            if (find_word(t.n_long, t.long_words, word) != NULL) ++found_cnt;
+            if (find_word_in_arr(t.n_long, t.long_words, word) != NULL) ++found_cnt;
         }
     }
     if (n_found != NULL) *n_found = found_cnt;

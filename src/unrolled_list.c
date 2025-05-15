@@ -5,7 +5,7 @@
 
 UnrNode* unr_ctr(UnrNode* next, char* s)
 {
-    UnrNode* node = (UnrNode*)calloc(sizeof(UnrNode), 1);
+    UnrNode* node = (UnrNode*)calloc(1, sizeof(UnrNode));
     if (node == NULL) return NULL;
 
     int len = strlen(s);
