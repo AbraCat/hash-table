@@ -1,6 +1,8 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <immintrin.h>
+
 #define maxlen 32
 #define align 32
 #define unroll_coeff 4
@@ -8,7 +10,7 @@
 #define TBL_USE_UNR
 #define OPT_STRCMP
 #define OPT_HASH_FN
-#define OPT_LIST_FIND
+// #define OPT_LIST_FIND
 
 #ifdef TBL_USE_UNR
     #define TblNode UnrNode
@@ -47,7 +49,13 @@
 #endif // OPT_STRCMP
 
 int round_up(int n, int alignment);
-int mystrcmp(const char* lft, const char* rgt);
 void dispersion(unsigned long long* a, int n, double* disp, double* expect);
+void relation_err(double x, double x_err, double y, double y_err, double* result, double* result_err);
+
+inline int mystrcmp(const char* lft, const char* rgt)
+{
+    __m256i xor_res = _mm256_xor_si256(_mm256_load_si256((const __m256i*)lft), _mm256_load_si256((const __m256i*)rgt));
+    return !_mm256_testz_si256(xor_res, xor_res);
+}
 
 #endif // UTILS_H

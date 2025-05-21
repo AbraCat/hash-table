@@ -11,6 +11,16 @@ const int n_short = 9423, n_long = 0, n_tests = 1e6;
 const char text_path[] = "txt/lord-of-rings.txt", words_path[] = "txt/lines", 
 short_path[] = "txt/short", long_path[] = "txt/long";
 
+void calc_error()
+{
+    double x, x_err, y, y_err;
+    scanf("%lf +- %lf %lf +- %lf", &x, &x_err, &y, &y_err);
+    double res = 0, res_err = 0;
+    relation_err(x, x_err, y, y_err, &res, &res_err);
+    printf("x / y = %lf +- %lf\n", res, res_err);
+    return 0;
+}
+
 int main(int argc, const char** argv)
 {
     srand(1);

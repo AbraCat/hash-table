@@ -18,7 +18,14 @@ my_lst_find:
 
     my_lst_find_loop:
     mov rdi, QWORD [rbx]
-    call mystrcmp
+
+    ; mystrcmp inlined
+    vmovdqa ymm0, [rsi]
+    vpxor   ymm0, ymm0, [rdi]
+    xor     eax, eax
+    vptest  ymm0, ymm0
+    setne   al
+    vzeroupper
 
     test rax, rax
     je my_lst_find_continue

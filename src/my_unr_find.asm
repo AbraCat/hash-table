@@ -26,7 +26,14 @@ my_unr_find:
     mov rdi, rcx
     shl rdi, 5
     add rdi, QWORD [rbx]
-    call mystrcmp
+
+    ; mystrcmp inlined
+    vmovdqa ymm0, [rsi]
+    vpxor   ymm0, ymm0, [rdi]
+    xor     eax, eax
+    vptest  ymm0, ymm0
+    setne   al
+    vzeroupper
 
     test rax, rax
     jne my_unr_find_continue
